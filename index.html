@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ficha de Classe + Rolador de Dados + Perícias + Modo Escuro</title>
+  <style>
+    /* (Seu CSS permanece igual) */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: white;
+      color: black;
+      transition: background-color 0.3s, color 0.3s;
+      display: flex;
+      gap: 20px;
+    }
+
+    body.modo-escuro {
+      background-color: #121212;
+      color: #eee;
+    }
+    body.modo-escuro input,
+    body.modo-escuro select {
+      background-color: #333;
+      color: #eee;
+      border-color: #555;
+    }
+    body.modo-escuro button {
+      background-color: #444;
+      color: #eee;
+      border-color: #666;
+    }
+    body.modo-escuro button:hover {
+      background-color: #666;
+    }
+    body.modo-escuro #descricaoHabilidade {
+      color: #ccc;
+    }
+    body.modo-escuro #habilidades li:hover {
+      color: #bb88ff;
+    }
+
+    #containerFicha {
+      flex: 1;
+      min-width: 320px;
+    }
+
+    #periciasSidebar {
+      width: 280px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-left: 2px solid #ccc;
+      padding-left: 15px;
+      position: sticky;
+      top: 20px;
+      align-self: flex-start;
+    }
+
+    #periciasSidebar h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .atributo-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .atributo-input {
+      width: 40px;
+      text-align: center;
+      font-size: 18px;
+      padding: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .atributo-maximo {
+      font-size: 16px;
+      color: #666;
+    }
+
+    .botao-ajuste {
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      background-color: #ddddff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .botao-ajuste:hover {
+      background-color: #bbbbee;
+    }
+
+    #habilidades li {
+      font-style: normal;
+      font-size: 18px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #habilidades li:hover {
+      color: #4a0080;
+      text-decoration: underline;
+    }
+
+    #descricaoHabilidade {
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    #roladorDados {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #ccc;
+    }
+
+    #roladorDados input {
+      font-size: 18px;
+      padding: 6px;
+      width: 160px;
+      margin-right: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    #roladorDados button {
+      font-size: 18px;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      background-color: #4488ff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+
+    #roladorDados button:hover {
+      background-color: #3366cc;
+    }
+
+    #resultadoDado {
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      min-height: 1.2em;
+    }
+
+    #botaoModoEscuro {
+      margin-bottom: 20px;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      background-color: #8888ff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    #botaoModoEscuro:hover {
+      background-color: #6666cc;
+    }
+
+    /* Perícias */
+    #periciasLista {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #periciasLista li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+    #periciasLista li button {
+      padding: 4px 8px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #666;
+      cursor: pointer;
+      background-color: #eee;
+      color: #333;
+      transition: background-color 0.3s;
+      margin-left: 6px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    #periciasLista li button.treinado {
+      background-color: #2ecc40;
+      color: white;
+      border-color: #27ae60;
+    }
+    #periciasLista li button.treinado::after {
+      content: " ";
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    body.modo-escuro #periciasLista li button {
+      background-color: #444;
+      color: #eee;
+      border-color: #666;
+    }
+    body.modo-escuro #periciasLista li button.treinado {
+      background-color: #2ecc40;
+      color: white;
+      border-color: #27ae60;
+    }
+    body.modo-escuro #periciasLista li button:hover {
+      background-color: #666;
+    }
+
+    #periciasLista li span.nomePericia {
+      color: #007bff;
+      cursor: pointer;
+      text-decoration: underline;
+      user-select: none;
+      font-weight: 600;
+    }
+    #periciasLista li span.nomePericia:hover {
+      color: #0056b3;
+    }
+
+    /* ABA Ataques */
+    #ataques {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #ccc;
+    }
+    #listaArmas li {
+      margin-bottom: 6px;
+    }
+    #listaArmas li button {
+      margin-left: 6px;
+    }
+    #formArma input {
+      margin-right: 6px;
+      padding: 4px 8px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    #formArma button {
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      background-color: #4488ff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    #formArma button:hover {
+      background-color: #3366cc;
+    }
+  </style>
+</head>
+<body>
+  <div id="containerFicha">
+    <button id="botaoModoEscuro">Ativar Modo Escuro</button>
+
+    <h1>Saboneteiras</h1>
+    <select id="classeSelect">
+      <option value="">Selecione</option>
+      <option value="militante">Militante</option>
+      <option value="burra">Burra</option>
+      <option value="caminhoneira">Caminhoneira</option>
+      <option value="crossfiteira">Crossfiteira</option>
+      <option value="saboneteira">Saboneteira</option>
+      <option value="higienica">Higiênica</option>
+      <option value="fotogenica">Fotogênica</option>
+      <option value="nerd">Nerd</option>
+      <option value="religiosa">Religiosa</option>
+      <option value="viciada">Viciada</option>
+      <option value="louca">Louca</option>
+      <option value="explosiva">Explosiva</option>
+      <option value="estranha">Estranha</option>
+      <option value="esquilete">Esquilete</option>
+    </select>
+
+    <div id="ficha" style="display: none; margin-top: 20px;">
+      <h2>Ficha</h2>
+
+      <div class="atributo-container">
+        <label for="vida">Vida:</label>
+        <button class="botao-ajuste" onclick="ajustarValor('vida', -1)">-</button>
+        <input type="number" id="vida" class="atributo-input" readonly />
+        <button class="botao-ajuste" onclick="ajustarValor('vida', 1)">+</button>
+        <span class="atributo-maximo">/ <span id="vidaMax"></span></span>
+      </div>
+
+      <div class="atributo-container">
+        <label for="sanidade">Sanidade:</label>
+        <button class="botao-ajuste" onclick="ajustarValor('sanidade', -1)">-</button>
+        <input type="number" id="sanidade" class="atributo-input" readonly />
+        <button class="botao-ajuste" onclick="ajustarValor('sanidade', 1)">+</button>
+        <span class="atributo-maximo">/ <span id="sanidadeMax"></span></span>
+      </div>
+
+      <div class="atributo-container">
+        <label for="pe">PE:</label>
+        <button class="botao-ajuste" onclick="ajustarValor('pe', -1)">-</button>
+        <input type="number" id="pe" class="atributo-input" readonly />
+        <button class="botao-ajuste" onclick="ajustarValor('pe', 1)">+</button>
+        <span class="atributo-maximo">/ <span id="peMax"></span></span>
+      </div>
+
+      <h3>Habilidades:</h3>
+      <ul id="habilidades"></ul>
+      <div id="descricaoHabilidade"></div>
+
+      <!-- Rolador de Dados -->
+      <div id="roladorDados">
+        <h2>Rolador de Dados</h2>
+        <input
+          type="text"
+          id="comandoDado"
+          placeholder="Ex: 2d6, 3d20#, 2d4+2, 1d20-1"
+          autocomplete="off"
+        />
+        <button onclick="rolarDado()">Rolar</button>
+        <div id="resultadoDado"></div>
+      </div>
+
+      <!-- Aba Ataques -->
+      <div id="ataques">
+        <h2>Ataques</h2>
+        <button onclick="mostrarFormularioArma()">Adicionar Arma</button>
+
+        <div id="formArma" style="display: none; margin-top: 10px;">
+          <input type="text" id="nomeArma" placeholder="Nome da arma" />
+          <input type="text" id="dadoArma" placeholder="Ex: 1d8+2" />
+          <button onclick="adicionarArma()">Salvar</button>
+          <button onclick="cancelarArma()">Cancelar</button>
+        </div>
+
+        <ul id="listaArmas" style="margin-top: 10px;"></ul>
+      </div>
+    </div>
+  </div>
+
+  <aside id="periciasSidebar">
+    <h2>Perícias</h2>
+    <ul id="periciasLista"></ul>
+  </aside>
+
+  <script>
+    // Dados e perícias
+    const dadosDasClasses = {
+      militante: {
+        vida: 22,
+        sanidade: 20,
+        pe: 6,
+        habilidades: {
+          'Consciência de Classe':
+            'Torne-se um novo Karl Marx e promova a revolta da classe trabalhadora. Aliados marxistas ganham +5 em testes. Custa 2 PE.',
+          "I'm Too Woke":
+            'Lacre alguém e permita que a militância consuma seus sentidos. Gaste 3 PE para que a próxima ação desejada pelo MARCADO ignore resistências.',
+        },
+        periciasTreinadas: ['atualidades', 'diplomacia'],
+      },
+      burra: {
+        vida: 10,
+        sanidade: 26,
+        pe: 6,
+        habilidades: {
+          'Às vezes um relógio quebrado acerta as horas':
+            'Por algum tipo de milagre paranormal consiga, por meio do seu único neurônio, realizar um PENSAMENTO RACIONAL. Gaste 2 PE para que você consiga realizar testes de Burrice com -10 no dado.',
+          'Amnésia':
+              'Por uma rodada se esqueça das suas responsabilidades e afazeres ganhando 2d6 de Vida e Sanidade. Gaste 3PE.'
+        },
+        periciasTreinadas: ['burrice', 'vergonha_alheia'],
+      },
+      caminhoneira: {
+        vida: 26,
+        sanidade: 14,
+        pe: 6,
+        habilidades: {
+          'Caminhão Tanque':
+            'Haja que nem um caminhão e comece a atropelar os seus inimigos num intenso encontrão, Dano = 2d6, Gaste 2PE',
+          'Entrega da Shoppe':
+            'Shoppe!, Sua encomenda acabou de Chegar em CURITIBA. Espere mais 2 rodadas e ganhe um desses itens a sua escolha. Item aleatório, Arma aleatória ou Cura aleatória. Gaste 3PE'
+             
+          
+        },
+        periciasTreinadas: ['pilotagem', 'percepcao']
+      },
+      crossfiteira: {
+        vida: 30,
+        sanidade: 10,
+        pe: 4,
+        habilidades: {
+          'Pré-Treino':
+            'Ao chacoalhar a sua garrafa e tomar o seu Whey Protein você sente que agora é a hora do treino de Bíceps. Ao socar alguém dê mais 1d8 de dano e deixe o alvo Vulnerável. Gaste 2PE',
+          'Treino de Perna':
+            'Por menor que seja a sua iniciativa, na próxima rodada, você será a primeira a começar. Gaste 2PE'
+       },
+       periciasTreinadas: ['atletismo', 'acrobacia']
+     },
+     saboneteira: {
+        vida: 20,
+        sanidade: 12,
+        pe: 6,
+        habilidades: {
+          'Sabonete Dove':
+            'Você se escorrega em seus inimigos como um sabonete, gaste 2PE e ganhe +5 de resistência pela Cena',
+          'Mestre, aquilo dali é um sabonete?':
+            'Force o Mestre a CRIAR COMICAMENTE um sabonete de chocolate na Cena que recupera 2d4 de Sanidade e Vida. Gaste 3PE'
+       },
+       periciasTreinadas: ['diplomacia', 'luta']
+     },
+     higienica: {
+        vida: 20,
+        sanidade: 12,
+        pe: 6,
+        habilidades: {
+          'Sabão Mata 99% dos Germes':
+            'Gaste 2 PE para conseguir se curar com qualquer item higiênico a saúde curando 2d6',
+          'Imunidade Antiviral':
+            'Ao cuidar da sua saúde você desenvolveu uma imunidade a certos tipos de dor que em seres humanos normais seriam aterrorizantes. Diminuia a metade o próximo dano que sofrer durante 3 rodadas. Gaste 3PE'
+
+       },
+       periciasTreinadas: ['fortitude', 'reflexos']
+     },
+     fotogenica: {
+        vida: 22,
+        sanidade: 10,
+        pe: 8,
+        habilidades: {
+          'Tiktok':
+            'Depois de ficar mais de 12 mil horas em redes sociais duvidosas, sua serotonina atingiu o seu ápice. Toda a realidade é mais lenta do que a tela do seu celular. Ganhe +10 em Esquiva, Reflexos OU Pontaria. Gaste 2PE',
+          'Live 24 Horas':
+            'Faça uma live para milhares de pessoas e gere um Efeito Transmissão que te beneficie, você agora consegue fazer testes do tipo TRANSMISSÂO. Gaste 4PE'
+       },
+       periciasTreinadas: ['enganacao', 'artes']
+     },
+     nerd: {
+        vida: 14,
+        sanidade: 20,
+        pe: 8,
+        habilidades: {
+          'Nerdolinha':
+             'Gaste 2 Pe e ganhe hiperfoco em um certo tipo de assunto por uma Cena garantindo +10 em qualquer péricia que envolva INTELECTO',
+          'Albert Einstein':
+             ' Transcenda os limites da física espaço-temporal e ganhe mais 1 turno por uma Cena (É acumulativo), Gaste 3PE.'
+       },
+       periciasTreinadas: ['tecnologia', 'atualidades']
+     },
+     religiosa: {
+        vida: 16,
+        sanidade: 20,
+        pe: 6,
+        habilidades: {
+          'Bíblia Sagrada':
+              'Gaste 2PE para que você ou algum aliado seja salvo de todos os pecados e ganhe resistência mental 5 até o final da Cena.',
+          'God is a WOMAN':
+              'O seu Deus, ou melhor, a sua DEUSA é feminista e ela precisa de fiéis. Ao passar a palavra do evangelho para uma pessoa desconhecida faça com que tanto você quanto a pessoa se protejam dos azares do INIMIGO (diabo) ganhando +1 dado nas próximas 3 rolagens. Gaste 3PE' 
+               
+       },
+       periciasTreinadas: ['religiao', 'vontade']
+     },
+     viciada: {
+        vida: 14,
+        sanidade: 10,
+        pe: 10,
+        habilidades: {
+           'Vício':
+               'Gaste 2PE para que o seu vício (sejá lá qual for) aumente em +5 algum teste à sua escolha',
+           'Overdose':
+               'Gaste 3PE e faça com que a sua Overdose de substâncias invada o seu corpo te deixando bombada. Ganhe +1 de Força pelo resto da Cena. (É acumulativo, máximo é 3 dados de Força, ao passar disso perde sanidade e vida)'
+       },
+       periciasTreinadas: ['medicina', 'iniciativa']
+     },
+     louca: {
+        vida: 22,
+        sanidade: 10,
+        pe: 6,
+        habilidades: {
+           'She is sooo Crazy':
+                'Gaste 2PE para tentar ser mais louca que o paranormal. Role 1d5 e se for par você recebe +10 no seu teste.',
+           'I Loveee Herrr':
+                'Gaste 3PE para tentar ser mais louca do que você mesma. Role 1d20 e se cair uma valor entre 17 - 20, você se torna um ser banhada à ENERGIA, consiga sucesso imediato nos seus próximos 3 testes sem a necessidade de rolar qualquer dado'
+       },
+       periciasTreinadas: ['crime', 'intimidacao']
+     },
+     explosiva: {
+        vida: 24,
+        sanidade: 17,
+        pe: 4,
+        habilidades: {
+           'Bomba de Hidrogênio': 
+                'Dessa vez você é a bomba de hidrogênio e o inimigo, o bebê tossindo, exploda-o com dano 3d6 e cause a condição RADIOATIVO',
+           '11 de Setembro':
+                ' Você já sabe o que fazer. Cause 11d9 de dano explosivo em troca da sua vida. (Apenas pode ser curado com o uso do ritual MEDICINA SANGRENTA)'
+       },
+       periciasTreinadas: ['tecnologia', 'tatica']
+     
+     },
+     estranha: {
+         vida: 14,
+         sanidade: 16,
+         pe: 6,
+         habilidades: {
+             'Garota Esquisita':
+                  'Gaste 2PE para conseguir aplicar um ritual limitado de primeiro círculo mesmo que você não seja ocultista. (Amaldiçoar arma, Armadura de Sangue e Cicatrização)',
+             'Female Rage':
+                   'O paranormal tem medo de mulheres e cabe a você se aproveitar disso. Gaste 3PE para que a sua ira feminina domine o espaço a sua volta. Quaisquer mulheres a sua volta ganham +1d6 de dano em qualquer ataque por uma rodada.'
+       },
+       periciasTreinadas: ['ocultismo', 'intimidacao']
+      },
+      esquilete: {
+          vida: 17,
+          sanidade: 18,
+          pe: 8,
+          habilidade: {
+              'Amo Ouçar Músicas':
+                  'Gaste 3 PE e faça que a sua lyrics do seu single do spotify distraia o oponente deixando-o com algum sentimento de sua escolha. Fazendo com que o Inimigo perca 1 Dado pela Cena',
+              'Falsete de Esquilo':
+                  'Grite o mais alto que você puder, quem estiver ouvindo seja inimigo ou não rompe o tímpano e fica completamente SURDO até a Cena acabar. Cause 2d12 de Dano e Gaste 2PE.'
+      },
+      periciasTreinadas: ['artes', 'diplomacia']
+     
+     },
+
+    };
+
+    const periciasPorClasse = {
+      militante: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      burra: [
+        'teimosia', 'desespero', 'burrice', 'vergonha_alheia', 'sorte',
+      ],
+      caminhoneira: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      crossfiteira: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      saboneteira: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      higienica: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      fotogenica: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      nerd: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      religiosa: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      viciada: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      louca: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      explosiva: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      estranha: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+      esquilete: [
+        'acrobacia', 'adestramento', 'artes', 'atletismo', 'atualidades', 'ciencias',
+        'crime', 'diplomacia', 'enganacao', 'fortitude', 'iniciativa', 'intimidacao',
+        'intuicao', 'investigacao', 'luta', 'medicina', 'ocultismo', 'percepcao',
+        'pilotagem', 'pontaria', 'profissao', 'reflexos', 'religiao', 'sobrevivencia',
+        'tatica', 'tecnologia', 'vontade',
+      ],
+
+    };
+
+    const periciasDisplay = {
+      acrobacia: 'Acrobacia',
+      adestramento: 'Adestramento',
+      artes: 'Artes',
+      atletismo: 'Atletismo',
+      atualidades: 'Atualidades',
+      ciencias: 'Ciências',
+      crime: 'Crime',
+      diplomacia: 'Diplomacia',
+      enganacao: 'Enganação',
+      fortitude: 'Fortitude',
+      iniciativa: 'Iniciativa',
+      intimidacao: 'Intimidação',
+      intuicao: 'Intuição',
+      investigacao: 'Investigação',
+      luta: 'Luta',
+      medicina: 'Medicina',
+      ocultismo: 'Ocultismo',
+      percepcao: 'Percepção',
+      pilotagem: 'Pilotagem',
+      pontaria: 'Pontaria',
+      profissao: 'Profissão',
+      reflexos: 'Reflexos',
+      religiao: 'Religião',
+      sobrevivencia: 'Sobrevivência',
+      tatica: 'Tática',
+      tecnologia: 'Tecnologia',
+      vontade: 'Vontade',
+      teimosia: 'Teimosia',
+      desespero: 'Desespero',
+      burrice: 'Burrice',
+      vergonha_alheia: 'Vergonha Alheia',
+      sorte: 'Sorte',
+    };
+
+    const select = document.getElementById('classeSelect');
+    const fichaDiv = document.getElementById('ficha');
+    const habilidadesUl = document.getElementById('habilidades');
+    const descricaoDiv = document.getElementById('descricaoHabilidade');
+    const periciasListaUl = document.getElementById('periciasLista');
+    const resultadoDado = document.getElementById('resultadoDado');
+    const comandoDadoInput = document.getElementById('comandoDado');
+    const botaoModoEscuro = document.getElementById('botaoModoEscuro');
+
+    let valoresMaximos = { vida: 0, sanidade: 0, pe: 0 };
+    let habilidadeSelecionada = null;
+    let periciasTreinadasAtuais = [];
+    let periciasLista = [];
+    let classeAtual = null;
+
+    // Nova lista de armas para aba Ataques
+    let armas = [];
+
+    function atualizarPericias() {
+      periciasListaUl.innerHTML = '';
+      periciasLista.forEach((pericia) => {
+        const li = document.createElement('li');
+
+        const nomeBtn = document.createElement('span');
+        nomeBtn.className = 'nomePericia';
+        nomeBtn.textContent = periciasDisplay[pericia] || pericia;
+        nomeBtn.title = 'Clique para rolar teste 1d20 ou modificar conforme a classe';
+        nomeBtn.addEventListener('click', () => {
+          rolarTestePericia(pericia);
+        });
+
+        const treinoBtn = document.createElement('button');
+        treinoBtn.textContent = 'T';
+        treinoBtn.title = 'Marcar/Desmarcar perícia treinada (+5 para militante, -5 para burra)';
+        treinoBtn.className = periciasTreinadasAtuais.includes(pericia)
+          ? 'treinado'
+          : '';
+        treinoBtn.addEventListener('click', () => {
+          if (periciasTreinadasAtuais.includes(pericia)) {
+            periciasTreinadasAtuais = periciasTreinadasAtuais.filter((p) => p !== pericia);
+          } else {
+            periciasTreinadasAtuais.push(pericia);
+          }
+          atualizarPericias();
+        });
+
+        li.appendChild(nomeBtn);
+        li.appendChild(treinoBtn);
+        periciasListaUl.appendChild(li);
+      });
+    }
+
+    function rolarTestePericia(pericia) {
+  let modificador = 0;
+  if (periciasTreinadasAtuais.includes(pericia)) {
+    if (classeAtual === 'militante') modificador += 5;
+    if (classeAtual === 'burra') modificador -= 5;
+    if (classeAtual === 'caminhoneira') modificador += 5;
+    if (classeAtual === 'crossfiteira') modificador += 5;
+    if (classeAtual === 'saboneteira') modificador += 5;
+    if (classeAtual === 'higienica') modificador += 5;
+    if (classeAtual === 'fotogenica') modificador += 5;
+    if (classeAtual === 'nerd') modificador += 5;
+    if (classeAtual === 'religiosa') modificador +=5
+    if (classeAtual === 'viciada') modificador += 5;
+    if (classeAtual === 'louca') modificador += 5;
+    if (classeAtual === 'explosiva') modificador += 5;
+    if (classeAtual === 'estranha') modificador += 5;
+    if (classeAtual === 'esquilete') modificador +=5;
+  }
+  // Monta comando do dado no formato "1d20+modificador"
+  const comando = `1d20${modificador >= 0 ? '+' : ''}${modificador}`;
+
+  // Coloca o comando no input do rolador de dados
+  comandoDadoInput.value = comando;
+
+  // Rola o dado usando a função já existente
+  rolarDado();
+
+  // Opcional: mostra o nome da perícia junto com o resultado
+  resultadoDado.textContent = `${periciasDisplay[pericia] || pericia}: ${resultadoDado.textContent}`;
+}
+    function ajustarValor(campo, delta) {
+      const input = document.getElementById(campo);
+      let valorAtual = Number(input.value);
+      let max = valoresMaximos[campo];
+      valorAtual += delta;
+      if (valorAtual < 0) valorAtual = 0;
+      if (valorAtual > max) valorAtual = max;
+      input.value = valorAtual;
+    }
+
+    function atualizarFicha() {
+      if (!classeAtual) return;
+      const dados = dadosDasClasses[classeAtual];
+      document.getElementById('vidaMax').textContent = dados.vida;
+      document.getElementById('sanidadeMax').textContent = dados.sanidade;
+      document.getElementById('peMax').textContent = dados.pe;
+      valoresMaximos = { vida: dados.vida, sanidade: dados.sanidade, pe: dados.pe };
+      document.getElementById('vida').value = dados.vida;
+      document.getElementById('sanidade').value = dados.sanidade;
+      document.getElementById('pe').value = dados.pe;
+
+      habilidadesUl.innerHTML = '';
+      for (const hab in dados.habilidades) {
+         const li = document.createElement('li');
+         li.textContent = hab;
+         li.title = dados.habilidades[hab];
+         li.addEventListener('click', () => {
+           if (descricaoDiv.textContent === dados.habilidades[hab]) {
+           descricaoDiv.textContent = '';
+         } else {
+           descricaoDiv.textContent = dados.habilidades[hab];
+     }
+  });
+  habilidadesUl.appendChild(li);
+}     
+ periciasTreinadasAtuais = [...dados.periciasTreinadas];
+      periciasLista = periciasPorClasse[classeAtual] || [];
+      atualizarPericias();
+
+      descricaoDiv.textContent = '';
+      habilidadeSelecionada = null;
+
+      // Limpar armas ao mudar classe
+      armas = [];
+      atualizarListaArmas();
+    }
+
+    select.addEventListener('change', () => {
+      classeAtual = select.value;
+      if (classeAtual) {
+        fichaDiv.style.display = 'block';
+        atualizarFicha();
+      } else {
+        fichaDiv.style.display = 'none';
+      }
+    });
+
+   function rolarDado() {
+  const comando = comandoDadoInput.value.toLowerCase().trim();
+  // Ajustei a regex para aceitar # ou ! com repetição opcional
+  const regex = /^(\d+)d(\d+)([#|!](\d+)?)?([+-]\d+)?$/;
+
+  const match = comando.match(regex);
+
+  if (!match) {
+    resultadoDado.textContent = 'Comando inválido. Use algo como 2d6, 1d20+3, 2d20#3-1 ou 4d10!+2.';
+    return;
+  }
+
+  const qtdDados = parseInt(match[1]);
+  const faces = parseInt(match[2]);
+  const operadorEspecial = match[3] ? match[3][0] : null; // '#' ou '!' ou null
+  const qtdRepeticoes = match[4] ? parseInt(match[4]) : 1;
+  const modificador = match[5] ? parseInt(match[5]) : 0;
+
+  let todosResultados = [];
+
+  if (operadorEspecial === '#') {
+    // Pega o maior dado
+    for (let i = 0; i < qtdRepeticoes; i++) {
+      for (let j = 0; j < qtdDados; j++) {
+        todosResultados.push(Math.floor(Math.random() * faces) + 1);
+      }
+    }
+    const maiorValor = Math.max(...todosResultados);
+    const resultadoFinal = maiorValor + modificador;
+
+    resultadoDado.textContent =
+      `Rolagem: ${todosResultados.join(', ')}` +
+      (modificador !== 0
+        ? ` ${modificador > 0 ? '+' : '-'} ${Math.abs(modificador)}\nResultado final: ${resultadoFinal}`
+        : `\nResultado final: ${maiorValor}`);
+
+  } else if (operadorEspecial === '!') {
+    // Pega o menor dado
+    for (let i = 0; i < qtdRepeticoes; i++) {
+      for (let j = 0; j < qtdDados; j++) {
+        todosResultados.push(Math.floor(Math.random() * faces) + 1);
+      }
+    }
+    const menorValor = Math.min(...todosResultados);
+    const resultadoFinal = menorValor + modificador;
+
+    resultadoDado.textContent =
+      `Rolagem: ${todosResultados.join(', ')}` +
+      (modificador !== 0
+        ? ` ${modificador > 0 ? '+' : '-'} ${Math.abs(modificador)}\nResultado final: ${resultadoFinal}`
+        : `\nResultado final: ${menorValor}`);
+
+  } else {
+    // Soma normal dos dados
+    let soma = 0;
+    for (let i = 0; i < qtdDados; i++) {
+      const resultado = Math.floor(Math.random() * faces) + 1;
+      todosResultados.push(resultado);
+      soma += resultado;
+    }
+    const resultadoFinal = soma + modificador;
+
+    resultadoDado.textContent =
+      `Rolagem: ${todosResultados.join(' + ')}` +
+      (modificador !== 0
+        ? ` ${modificador > 0 ? '+' : '-'} ${Math.abs(modificador)}\nResultado final: ${resultadoFinal}`
+        : `\nResultado final: ${soma}`);
+  }
+}
+
+
+    // Modo escuro
+    botaoModoEscuro.addEventListener('click', () => {
+      document.body.classList.toggle('modo-escuro');
+      if (document.body.classList.contains('modo-escuro')) {
+        botaoModoEscuro.textContent = 'Desativar Modo Escuro';
+      } else {
+        botaoModoEscuro.textContent = 'Ativar Modo Escuro';
+      }
+    });
+
+    // ABA ATAQUES - Funções
+
+    function mostrarFormularioArma() {
+      document.getElementById('formArma').style.display = 'block';
+      document.getElementById('nomeArma').value = '';
+      document.getElementById('dadoArma').value = '';
+    }
+
+    function cancelarArma() {
+      document.getElementById('formArma').style.display = 'none';
+    }
+
+    function adicionarArma() {
+      const nome = document.getElementById('nomeArma').value.trim();
+      const dado = document.getElementById('dadoArma').value.trim();
+      if (!nome || !dado) {
+        alert('Preencha o nome e o dado da arma.');
+        return;
+      }
+      armas.push({ nome, dado });
+      atualizarListaArmas();
+      cancelarArma();
+    }
+
+    function excluirArma(index) {
+      armas.splice(index, 1);
+      atualizarListaArmas();
+    }
+
+    function rolarAtaque(dado, nome) {
+      comandoDadoInput.value = dado;
+      rolarDado();
+      resultadoDado.textContent = `${nome}: ${resultadoDado.textContent}`;
+    }
+
+    function atualizarListaArmas() {
+      const lista = document.getElementById('listaArmas');
+      lista.innerHTML = '';
+      armas.forEach((arma, index) => {
+        const li = document.createElement('li');
+        const nomeStrong = document.createElement('strong');
+        nomeStrong.textContent = arma.nome + ' ';
+
+        const btnRolar = document.createElement('button');
+        btnRolar.textContent = 'Atacar';
+        btnRolar.onclick = () => rolarAtaque(arma.dado, arma.nome);
+
+        const btnExcluir = document.createElement('button');
+        btnExcluir.textContent = 'Excluir';
+        btnExcluir.onclick = () => excluirArma(index);
+
+        li.appendChild(nomeStrong);
+        li.appendChild(btnRolar);
+        li.appendChild(btnExcluir);
+        lista.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
